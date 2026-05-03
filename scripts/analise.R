@@ -22,70 +22,25 @@ library(lmtest)     # Testes estatísticos (ex: Breusch-Pagan para heterocedasti
 # ---------------------------------------------------------
 # 3. IMPORTAR BASE DE DADOS -------------------------------
 # ---------------------------------------------------------
-redem <- import("~/Assessorias/ReDem - Base/INCT_ReDem.sav")
+base <- import("~/GitHub/Democracia Mobilizada/data/base_democracia_mobilizada.csv.csv")
 
 # ---------------------------------------------------------
-# 4. TRATAMENTO DE MISSING --------------------------------
+# 4. DEFINIÇÃO DO DESENHO AMOSTRAL ------------------------
 # ---------------------------------------------------------
-redem <- redem %>%
-  mutate(across(P02A:P22, ~ ifelse(. > 10, NA, .)))
+desenho <- svydesign(
+  ids = ~1,
+  weights = ~FATOR_POND,
+  data = base
+)
 
 # ---------------------------------------------------------
-# 5. RECODIFICAÇÃO DE VARIÁVEIS ---------------------------
+# 5. MODELOS PRINCIPAIS (SEM INTERAÇÃO) -------------------
 # ---------------------------------------------------------
 # Vetor com os itens de democracia utilizados no artigo
 vars_all <- c("P09","P03",
               "P13","P17","P18","P19",
               "P02A","P05","P06","P08","P10","P11","P12",
               "P15","P20","P21","P22")
-
-redem <- redem %>%
-  mutate(
-    # Variável principal: engajamento em protesto
-    grupo_protesto = case_when(
-      P162 == 1 ~ "Já protestou",
-      P162 == 2 ~ "Pensou em protestar",
-      P162 == 3 ~ "Não protestou"
-    ),
-    
-    grupo_protesto = factor(grupo_protesto,
-                            levels = c("Não protestou",
-                                       "Pensou em protestar",
-                                       "Já protestou")),
-    
-    # Controles sociodemográficos
-    idade = as.numeric(IDADE_EX),
-    renda = ifelse(RENDA_1 > 6, NA, 7 - RENDA_1),
-    educação = as.numeric(ESCOLARIDADE),
-    ideologia = ifelse(P63 > 10, NA, P63),
-    sexo = ifelse(SEXO == 1, "Masculino", "Feminino")
-  ) %>%
-  select(
-    # Itens de democracia
-    all_of(vars_all),
-    
-    # Variável principal
-    grupo_protesto,
-    
-    # Controles
-    idade, renda, educação, ideologia, sexo,
-    
-    # Peso amostral
-    FATOR_POND
-  )
-
-# ---------------------------------------------------------
-# 6. DEFINIÇÃO DO DESENHO AMOSTRAL ------------------------
-# ---------------------------------------------------------
-desenho <- svydesign(
-  ids = ~1,
-  weights = ~FATOR_POND,
-  data = redem
-)
-
-# ---------------------------------------------------------
-# 7. MODELOS PRINCIPAIS (SEM INTERAÇÃO) -------------------
-# ---------------------------------------------------------
 
 modelos <- setNames(
   lapply(vars_all, function(v){
@@ -98,7 +53,7 @@ modelos <- setNames(
 )
 
 # ---------------------------------------------------------
-# 8. EXTRAÇÃO DOS RESULTADOS ------------------------------
+# 6. EXTRAÇÃO DOS RESULTADOS ------------------------------
 # ---------------------------------------------------------
 
 resultados <- lapply(names(modelos), function(v){
@@ -121,7 +76,7 @@ resultados <- lapply(names(modelos), function(v){
   )
 
 # ---------------------------------------------------------
-# 9. VISUALIZAÇÃO DOS COEFICIENTES ------------------------
+# 7. VISUALIZAÇÃO DOS COEFICIENTES ------------------------
 # ---------------------------------------------------------
 
 plot_hipotese <- function(nome_hipotese){
@@ -156,7 +111,7 @@ ggsave("grafico_hipo_liberal.png", g_lib, 10, 6, dpi = 600)
 ggsave("grafico_hipo_majoritaria.png", g_maj, 10, 6, dpi = 600)
 
 # ---------------------------------------------------------
-# 10. MODELOS COM INTERAÇÃO -------------------------------
+# 8. MODELOS COM INTERAÇÃO -------------------------------
 # ---------------------------------------------------------
 
 modelos_int <- setNames(
@@ -170,7 +125,7 @@ modelos_int <- setNames(
 )
 
 # ---------------------------------------------------------
-# 11. PREDIÇÕES MARGINAIS ---------------------------------
+# 9. PREDIÇÕES MARGINAIS ---------------------------------
 # ---------------------------------------------------------
 
 resultados_int <- lapply(names(modelos_int), function(v){
@@ -195,7 +150,7 @@ resultados_int <- lapply(names(modelos_int), function(v){
   )
 
 # ---------------------------------------------------------
-# 12. VISUALIZAÇÃO DAS INTERAÇÕES -------------------------
+# 10. VISUALIZAÇÃO DAS INTERAÇÕES -------------------------
 # ---------------------------------------------------------
 
 plot_interacao <- function(nome_hipotese){
@@ -226,10 +181,10 @@ ggsave("grafico_int_liberal.png", g_lib, 10, 6, dpi = 600)
 ggsave("grafico_int_majoritaria.png", g_maj, 10, 6, dpi = 600)
 
 # ---------------------------------------------------------
-# 13. DIAGNÓSTICOS ----------------------------------------
+# 11. DIAGNÓSTICOS ----------------------------------------
 # ---------------------------------------------------------
 
-# 13.1 VIF
+# 11.1 VIF
 vif_int <- lapply(vars_all, function(v){
   f <- as.formula(
     paste(v, "~ grupo_protesto * ideologia + idade + sexo + educação + renda")
@@ -238,7 +193,7 @@ vif_int <- lapply(vars_all, function(v){
   vif(m)
 })
 
-# 13.2 Breusch-Pagan
+# 11.2 Breusch-Pagan
 bp_results <- lapply(vars_all, function(v){
   f <- as.formula(
     paste(v, "~ grupo_protesto * ideologia + idade + sexo + educação + renda")
@@ -248,7 +203,7 @@ bp_results <- lapply(vars_all, function(v){
 })
 
 # ---------------------------------------------------------
-# 14. SUMÁRIO DOS DIAGNÓSTICOS ----------------------------
+# 12. SUMÁRIO DOS DIAGNÓSTICOS ----------------------------
 # ---------------------------------------------------------
 
 bp_table <- data.frame(
