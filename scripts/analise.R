@@ -27,6 +27,13 @@ base <- import("~/GitHub/Democracia Mobilizada/data/base_democracia_mobilizada.c
 # ---------------------------------------------------------
 # 4. DEFINIÇÃO DO DESENHO AMOSTRAL ------------------------
 # ---------------------------------------------------------
+base =
+  base %>%
+  mutate(grupo_protesto = factor(grupo_protesto,
+                                 levels = c("Não protestou",
+                                            "Pensou em protestar",
+                                            "Já protestou")))
+
 desenho <- svydesign(
   ids = ~1,
   weights = ~FATOR_POND,
@@ -75,6 +82,8 @@ resultados <- lapply(names(modelos), function(v){
     )
   )
 
+
+
 # ---------------------------------------------------------
 # 7. VISUALIZAÇÃO DOS COEFICIENTES ------------------------
 # ---------------------------------------------------------
@@ -93,7 +102,7 @@ plot_hipotese <- function(nome_hipotese){
     geom_vline(xintercept = 0, linetype = "dashed") +
     labs(
       title = paste("Efeito do protesto -", nome_hipotese),
-      x = "Coeficiente (ref.: não protestou)",
+      x = "Coeficiente (ref.: Não protestou)",
       y = "Itens"
     ) +
     theme_minimal()
@@ -105,10 +114,10 @@ g_soc  <- plot_hipotese("Social")
 g_lib  <- plot_hipotese("Liberal")
 g_maj  <- plot_hipotese("Majoritária-Autoritária")
 
-ggsave("grafico_hipo_participativa.png", g_part, 10, 6, dpi = 600)
-ggsave("grafico_hipo_social.png", g_soc, 10, 6, dpi = 600)
-ggsave("grafico_hipo_liberal.png", g_lib, 10, 6, dpi = 600)
-ggsave("grafico_hipo_majoritaria.png", g_maj, 10, 6, dpi = 600)
+ggsave("grafico_hipo_participativa.png",plot = g_part,width = 10,height = 6,dpi = 600)
+ggsave("grafico_hipo_social.png", plot = g_soc,width = 10,height = 6,dpi = 600)
+ggsave("grafico_hipo_liberal.png", plot = g_lib,width = 10,height = 6,dpi = 600)
+ggsave("grafico_hipo_majoritaria.png", plot = g_maj,width = 10,height = 6,dpi = 600)
 
 # ---------------------------------------------------------
 # 8. MODELOS COM INTERAÇÃO -------------------------------
@@ -175,10 +184,10 @@ g_soc  <- plot_interacao("Social")
 g_lib  <- plot_interacao("Liberal")
 g_maj  <- plot_interacao("Majoritária-Autoritária")
 
-ggsave("grafico_int_participativa.png", g_part, 10, 6, dpi = 600)
-ggsave("grafico_int_social.png", g_soc, 10, 6, dpi = 600)
-ggsave("grafico_int_liberal.png", g_lib, 10, 6, dpi = 600)
-ggsave("grafico_int_majoritaria.png", g_maj, 10, 6, dpi = 600)
+ggsave("grafico_int_participativa.png", plot = g_part,width = 10,height = 6,dpi = 600)
+ggsave("grafico_int_social.png", plot = g_soc,width = 10,height = 6,dpi = 600)
+ggsave("grafico_int_liberal.png", plot = g_lib,width = 10,height = 6,dpi = 600)
+ggsave("grafico_int_majoritaria.png", plot = g_maj,width = 10,height = 6,dpi = 600)
 
 # ---------------------------------------------------------
 # 11. DIAGNÓSTICOS ----------------------------------------
