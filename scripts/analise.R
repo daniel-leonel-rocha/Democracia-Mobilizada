@@ -22,7 +22,7 @@ library(lmtest)     # Testes estatísticos (ex: Breusch-Pagan para heterocedasti
 # ---------------------------------------------------------
 # 3. IMPORTAR BASE DE DADOS -------------------------------
 # ---------------------------------------------------------
-base <- import("~/GitHub/Democracia Mobilizada/data/base_democracia_mobilizada.csv.csv")
+base <- import("~/GitHub/Democracia Mobilizada/data/base_democracia_mobilizada.csv")
 
 # ---------------------------------------------------------
 # 4. DEFINIÇÃO DO DESENHO AMOSTRAL ------------------------
@@ -212,7 +212,32 @@ bp_results <- lapply(vars_all, function(v){
 })
 
 # ---------------------------------------------------------
-# 12. SUMÁRIO DOS DIAGNÓSTICOS ----------------------------
+# 12. DIAGNÓTICO DOS RESÍDUOS -----------------------------
+# ---------------------------------------------------------
+
+dir.create("diagnosticos_residuos", showWarnings = FALSE) 
+
+lapply(vars_all, function(v){
+  
+  f <- as.formula(
+    paste0("`", v, "` ~ grupo_protesto * ideologia + idade + sexo + educação + renda")
+  )
+  
+  m <- lm(f, data = desenho$variables)
+  
+  png(filename = paste0("diagnosticos_residuos/", v, "_diagnostico.png"),
+      width = 1200, height = 800)
+  
+  par(mfrow = c(1,2))
+  
+  plot(m, which = 1, main = paste(v, "- Residuals vs Fitted"))
+  plot(m, which = 2, main = paste(v, "- Normal Q-Q"))
+  
+  dev.off()
+})
+
+# ---------------------------------------------------------
+# 13. SUMÁRIO DOS DIAGNÓSTICOS ----------------------------
 # ---------------------------------------------------------
 
 bp_table <- data.frame(
