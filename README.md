@@ -2,7 +2,7 @@
 
 Este repositório contém os dados e scripts utilizados no artigo:
 
-**“Democracia Mobilizada: o papel do protesto na formação de valores democráticos”**
+**“Democracia mobilizada no Brasil: como os manifestantes definem e avaliam atributos da democracia?”**
 (Daniel Leonel da Rocha)
 
 ## 📌 Descrição
